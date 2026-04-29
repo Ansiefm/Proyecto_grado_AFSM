@@ -1,0 +1,330 @@
+---
+title: "Analisis estadistico del dataset"
+author: "Andrés Felipe Sierra Sierra"  
+date: "2026-02"
+output: html
+---
+
+```{r setup, include=FALSE}
+## Global options
+knitr::opts_chunk$set(cache = TRUE)
+```
+
+# Analisis estadistico de los datos de precipitacion y topografia
+
+Este script tendrá el análisis exploratorío estadístico, teniendo en cuenta un análisis con componentes principales y ver prueba de normalidad;
+sin embargo, se deja constancia de conocimiento sobre la poca incidencia o importancia de la pruebas tales como normalidad ya que el modelamiento
+se hará con Random Forest (este no exige prueba de normalidad).
+
+## Librería
+
+```{r Instalar_liberias}
+if (!require(MVN)) install.packages("MVN")
+if (!require(factoextra)) install.packages("factoextra")
+if (!require(FactoMineR)) install.packages("FactoMineR")
+if (!require(ggplot2)) install.packages("ggplot2")
+if (!require(tidyverse)) install.packages("tidyverse")
+if (!require(dplyr)) install.packages("dplyr")
+if (!require(tibble)) install.packages("tibble")
+if (!require(psych)) install.packages("psych")
+if (!require(corrplot)) install.packages("corrplot")
+
+```
+
+
+```{r Libreria}
+library(MVN)
+library(factoextra)
+library(FactoMineR)
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+library(tibble)
+library(psych)
+library(corrplot)
+```
+
+## Cargue de datos
+```{r Cargue_datos}
+getwd() # Vemos donde esta mirando el documento (donde se ubica este doc)
+# Cargamos documentos
+df <- read.csv("Data_preparada/Random-forest_data/panel_modelo_2010_2024_base.csv")
+
+head(df[sample(nrow(df)), ])
+```
+Se hace el cargue del dataset para la exploración y análisis estadístico, la variable df queda dispuesta
+para el almacenamiento de los datos.
+
+```{r Exploracion}
+summary(df) # Se muestra el resumen de dataset
+
+str(df) # Se muestra que tipo de variable es y el numero de observaciones
+```
+Tal como se conoce los datos que están hacen parte del proceso ya realizado  de extracción y preparación
+en Python del Script (Geoespacial_RF_U-NET.ipynb), sin embargo, se tiene variables numericas, booleana y
+chr que corresponde a la cadena de carácteres. Se recibe un total de 62 columnas/variables y cerca de los
+200k de datos.
+
+Para realizar el análisis se entiende que debe solo hacer el proceso con datos numericos, ergo extraemos
+los datos necesarios, se hace la anotación de que se conoce desde el primer momento que hay variables que
+seguramente dará el resultado de multicolinealidad, pero se decide proceder para realizar el ejercicio completo.
+
+```{r Extraccion_analisis}
+# IMPORTANTE: Excluimos IDs, fechas, textos, proporciones dependientes y variables binarias.
+variables_continuas <- c(
+  "precipitacion_media_mensual_mm",
+  "area_municipio_km2",
+  "densidad_drenaje_km_km2",
+  "distancia_drenaje_m",
+  "elevacion_media_m",
+  "pendiente_media_grados",
+  "proporcion_humedales",
+  "precipitacion_acumulada_3m_mm",
+  "frontera_agricola_total_ha"
+)
+
+df_num <- df %>%
+  select(all_of(variables_continuas)) %>%
+  drop_na() # Omitimos NA ya que la distancia de Mahalanobis no los acepta
+
+head(df_num)
+```
+
+```{r Verificar_datos}
+cat("Registros limpios para el análisis: ", nrow(df_num))
+```
+
+## Distancia mahalanobis
+Se pasa al análisis de los valores atipicos con la distancia de Mahalanobis.
+
+```{r Distancia_mahalanobis}
+xbarra <- colMeans(df_num) # Se calcula Xbarra
+s <- cov(df_num) # Se calcula la Covarianza
+
+dm <- mahalanobis(df_num, xbarra, s) #Calcular Mahalanobis
+# dm
+```
+
+En el terminal se muestra un número considerable de distancias atípicas que en el caso academico son los
+valores a considerar por ser los más extremos teniendo el comportamiento deseado a identificar ya que de
+esta manera conocemos los outliers, sin embargo, al ser tantos datos identificar se vuelven un problema,
+ergo usamos un nivel de confianza del 97.5% para ver datos atípicos.
+
+```{r outliers}
+cutoff <- qchisq(0.975, df = ncol(df_num)) # Usando un nivel de confianza del 97.5%
+outliers <- which(dm > cutoff) # Vemos quienes son los outliers
+# outliers
+```
+
+Por lo que se observa, usando un nivel de confianza de 97.5% sigue mostrando un número considerable de atípicos,
+sin embargo, en reaseguro estos eventos son lo que se considera al ver las pérdidas máximas posibles (PML)
+y el precio de la prima, también conodido como tailrisk; Con la distancia de Mahalanobis se busca identificar
+los meses y munipios han tenido un comportamiento inusual ya sea por la combianción de variables de la 
+pentiente, precipitación acumulada y la humedad, entre otros.
+
+Ya que es información exploratoría y de análisis se considera en guardar en un dataframe en dado caso se quiera
+realizar algo con los datos extremos.
+
+```{r extraccion_atipicos}
+# Grados de libertad = número de columnas en df_num
+p <- ncol(df_num)
+
+# Umbral crítico (alpha = 0.001 para detectar eventos extremos)
+umbral <- qchisq(1 - 0.001, df = p)
+
+# Identificar cuáles filas son eventos de alto riesgo
+atipicos_riesgo <- which(dm > umbral)
+
+# Crear un dataframe con solo los eventos de mayor riesgo
+df_extremos <- df_num[atipicos_riesgo, ]
+```
+
+
+## Prueba de normalidad multivariada
+
+Se decide probar la normalidad multivariada con Henze-Zirkler ya que está es buena para dimensiones grandes que en este caso n mayor a 190 k
+de registros es una muestra considerable, este usa asimetría y curtosis haciendo viable para procesos de Big Data basandose en chi cuadrado,
+además la otra opción Doornik-Hansen es computacionalmente costosa en comparación a la escogida. Por otro lado, para la prueba univariada se 
+escoge Anderson-Darling para tener una referencia, sin embargo, al se una muestra tan grande es muy probable que muestre como resultado la no
+normalidad multivariada (En algunos casos se considera que n>5000 ya es un problema para Anderson-Darlin), ergo, se decide comparar por n 
+grande la significancia estadística pierde relevancia en comparación a la práctica, por eso utilizaremos Gráfico Q-Q.
+
+por otro lado, se tiene en cuenta que algunas variables están diseñadas para ser parte del modelo parámetrico, por ende seguramente se mostrarán 
+como correlacionadas, las variables que fueron creadas en base a las originales siendo precipitacion_media_mensual_mm, la anterior permitió considerar 
+crear las siguientes variables: precipitacion_acumulda_3m, precipitacion_media_3m que corresponden a la información acumulada y promedio por tres meses, 
+además otras variables que son derivadas de los datos agrícolas, datos del conjunto EVA, entre otros; luego a partir de la precipitacion_media_mensual_mm se 
+crear un percentil para detectar meses extremos que funcionaría como trgger base siendo: p95_mun y is_extreme_month que la última es un booleano 
+con el calculo ya hecho si es un extremo. Las demás variables son: area_municipio_km2, longitud_drenaje_km, densidad_drenaje_km_km2, distancia_drenaje_m, proporcion_humedales, 
+elevacion_media_m y pendiente_media_grados.
+
+Dado a que la muestra es considerablemnete grande (n >190k) se decide extraer una muestra aleatoria de n=5000. Además, al intentar la prueba
+multivaraida da el siguiente problema: Error in solve.default... system is computationally singular: reciprocal condition number = 2.93601e-17,
+lo que significa que si está afectando los parámetros creados a partir de la variable precip_mm_month_mean, ergo, se decide, cambiar la extracción
+de variables a solo las necesarias quitando precip_3m_sum y precip_3m_mean quedanod 9 columnas para le análisis (Esto tal vez cambie los resultados
+de la distancia de Mahalanobis).
+
+```{r Prueba_normalidad_multivariada}
+set.seed(886)
+muestra_aleatoria <- df_num[sample(nrow(df_num), 1000), 1:9]
+mvn(muestra_aleatoria, mvnTest = "hz", univariateTest = "AD",
+    univariatePlot = "box", multivariateOutlierMethod = "none",
+    showOutliers = TRUE, showNewData = FALSE)
+```
+
+```{r Qqplot}
+# Se sua el geom_qq, pero con un alpha bajo para manejar el solapamiento
+ggplot(df_num, aes(sample = .data[["precipitacion_media_mensual_mm"]])) +
+  stat_qq(alpha = 0.1, color = "#2c3e50") +
+  stat_qq_line(color = "red", linewidth = 1) +
+  labs(
+    title = paste("Gráfico Q-Q para:", "precipitacion_media_mensual_mm"),
+    subtitle = "Muestra > 190k registros",
+    x = "Cuantiles Teóricos",
+    y = "Cuantiles de la Muestra"
+  ) +
+  theme_minimal()
+```
+
+Se prueba el resultado varias veces con varios tamaños en la muestra dando como resultado algo general parecido a lo siguiente: 
+$multivariateNormality
+           Test       HZ p value MVN
+1 Henze-Zirkler 17.97058       0  NO
+
+$univariateNormality
+              Test                       Variable Statistic   p value Normality
+1 Anderson-Darling precipitacion_media_mensual_mm   18.2453  <0.001      NO    
+2 Anderson-Darling       area_municipio_km2        247.0751  <0.001      NO    
+3 Anderson-Darling    densidad_drenaje_km_km2      170.5811  <0.001      NO    
+4 Anderson-Darling      distancia_drenaje_m         66.5829  <0.001      NO    
+5 Anderson-Darling       elevacion_media_m          17.6019  <0.001      NO    
+6 Anderson-Darling     pendiente_media_grados        7.7474  <0.001      NO    
+7 Anderson-Darling      proporcion_humedales       266.2258  <0.001      NO    
+8 Anderson-Darling precipitacion_acumulada_3m_mm    19.8104  <0.001      NO    
+9 Anderson-Darling   frontera_agricola_total_ha    222.9072  <0.001      NO 
+
+Primeras impresiones, la muestra no es normal multivariada, además en la pruebas univariadas se muestran que todas las variables no cumple con
+normalidad, el resultado es esperado esto se puede explicar porque algunas variables son proporciones la cual implique una transformación, sin
+embargo, el la vida real es muy poco usual que se cumplan las pruebas de normalidad ya que variables como area_geom_km2, precip_mm_month_mean y
+slope_mean_deg suelan seguir distribuciones gamma o Log-normal. Ejemplo, siendo más especificos la precipitación dependiendo de la zona puede 
+tener valores bajos y valores altos, sin embargo, algunos atípicos pueden crear un sesgo en su comportamiento, que en terminos generales es el
+objetivo del documento, buscar este comportamiento extremo. Por otro lado, en la imagen de los Box-plot se observa gran cantidad de atípicos,
+igualmente en la gráfica QQplot muestra una forma exponencial imaginaría, donde tiene fuertes colas a derecha y a izquierda. 
+
+Ya conociendo lo anterior, aunque las pruebas rechacen la normalidad multivariada y univariada con las pruebas de Henze-Zirkler y Anderson-Darlin
+respectivamente por el tamaño de la población, podemos acogernos a la normalidad asíntotica gracias a la teoría del límite central.
+
+## Relaciones en las variables
+Una vez confirmado el comportamiento de los datos pasamos a ver las variables correlacionadas, hay que tener en cuenta que solo análizaremos las
+variables base para no tener correlación de 1 con variables creadas anteriormente.
+
+```{r Correlación}
+# Calcular matriz de correlación
+r <- cor(df_num)
+# Calcular p-valores de las correlaciones
+p_matrix <- cor.mtest(df_num, conf.level = 0.975)$p
+# Graficar con significancia estadística
+corrplot(cor(df_num),
+         method = "color",
+         type = "upper",
+         col = colorRampPalette(c("#2b8cbe", "#f7fcf0", "#e41a1c"))(100),
+         tl.col = "black",
+         addCoef.col = "black")
+```
+
+La correlación muestra que no hay multicolinealidad general, es decir, solo hay una variable (Se sospechaba desde el principio) que es altamente
+correlacionada con precipitacion_media_mensual_mm, esta es precipitacion_acumulada_3m_mm que es el resultado del calculo de la variable del mismo nombre acumulado a tres meses.
+El porcentaje de correlación es de 0.84 que lo hace poco preocupante al querer llevarlo dentro del modelo. Por otro lado, ya visto la no normalidad
+podemos saber si soon variables significativas. 
+
+Actualización: La correlación permite ver si las variables son capaces y merecen la pena de usar ACP para disminuir dimensionalidad, en este caso
+la imagen muestra la mayoría al rededor de 0, solo dos variables podrían lograr reducir dimensionalidad siendo elev_mean_m y slope_mean_deg; No 
+es muy viable usar ACP para un análisis completo. Sin embargo, se decide seguir con pruebas para ver su viabilidad.
+
+```{r Significancia}
+p_matrix <- matrix(NA, nrow = ncol(df_num), ncol = ncol(df_num))
+for (i in 1:ncol(df_num)) { # nolint
+  for (j in 1:ncol(df_num)) { # nolint
+    p_matrix[i, j] <- cor.test(df_num[, i], df_num[, j])$p.value
+  }
+}
+p_matrix
+```
+
+Se puede observar que la mayoría de variables son significativas exceptuando la variable 5 (dist_dren_m) con 8.394341e-01, esto hace pensar que
+puede aportar información sin linealidad de precipitación, en otras palabras al usarla en ACP puede convertirse en un componente por si solo.
+
+
+## Análisis de componentes principales
+Considerando que la prueba de normalidad multivariada dió negativa, da píe a usar como análisis ACP (Análisis de Componentes Principales), se
+podría considerar usar Análisis Factorial, sin embargo, no se quiere seleccionar y no se tiene pensado usar para los modelos de machine learning.
+
+Para iniciar con el ACP, debemos estar seguros de que tiene simetría, además de valorar la curtosis (que ya conocemos que posee bastantes) de
+esta forma se podría tener en cuenta las variables más influyentes, además con la prueba de correlación se tiene en cuenta cuales son las variables
+que podrían conformarse como componentes principales reduciendo la dimensionalidad.
+
+```{r Simetria_curtosis}
+stats_descriptivas <- describe(df_num[, 1:9])
+
+# Media, asimetría y curtosis
+
+reporte_forma <- stats_descriptivas[, c("mean", "sd", "skew", "kurtosis")]
+
+print(reporte_forma)
+```
+
+Se identifica particularidades con Skew y la curotsis, en el caso de Skew podemos observar que las variables elev_mean_m, slope_mean_deg son
+simetricas, por otro lado, precip_mm_month_mean y p95_mun hay un sesgo, en el caso de las demás denotan ser bastante asimetricas considerando la
+posibilidad de aplicar una transformación; En el caso de la curtosis, tiene valores altos marcando la presencia de outliers lo que afectaría el
+ACP, se comeinza a descartar la posibilidad de usar ACP. (Se decide probar con la prueba de Kaiser Meyer Olkin, este confirma lo dicho anteriormente
+de la correlación)
+
+```{r}
+KMO(cor(df_num))
+```
+
+```{r KMO_Mejorado}
+# Eliminamos la variable con MSA < 0.50 (densidad_drenaje_km_km2)
+variables_filtradas <- df_num %>%
+  select(-densidad_drenaje_km_km2)
+
+# Volvemos a calcular la matriz de correlación (Spearman)
+matriz_cor_2 <- cor(variables_filtradas, method = "spearman")
+
+# Volvemos a correr la prueba KMO
+resultado_kmo_2 <- KMO(matriz_cor_2)
+print("--- NUEVO KMO TRAS ELIMINAR VARIABLE CON BAJO MSA ---")
+print(resultado_kmo_2)
+```
+
+```{r}
+# ------ ACP usando la función PCA
+pca1 <- PCA(variables_filtradas, scale.unit = TRUE)
+names(pca1) # Valores de salida 
+
+# Resumen de resultados del PCA
+summary(pca1)
+
+# Porcentaje de Varianza
+perc_varianza <- pca1$eig[,2]
+perc_varianza
+
+# Porcentaje de Varianza Acumulado
+perc_varianza_acum <- pca1$eig[,3]
+perc_varianza_acum
+
+# Contribuciones
+fviz_contrib(pca1,choice="var",axes=1)
+fviz_contrib(pca1,choice="var",axes=2)
+fviz_contrib(pca1,choice="var",axes=3)
+fviz_contrib(pca1,choice="var",axes=4)
+
+# Calidad de la representación
+fviz_cos2(pca1,choice="var",axes=1)
+fviz_cos2(pca1,choice="var",axes=2)
+```
+
+```{r Borrar_kernel_cache}
+gc()
+system("R")
+```
+

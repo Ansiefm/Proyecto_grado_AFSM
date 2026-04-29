@@ -1,0 +1,11 @@
+# Ignorar todas las carpetas que empiecen por Data
+Data/
+Data_preparada/
+Data_CULTIVOS/
+**/Data/
+
+# Por si acaso, ignorar extensiones en cualquier carpeta
+**/*.csv
+**/*.xlsx
+**/*.shp
+**/*.dbf

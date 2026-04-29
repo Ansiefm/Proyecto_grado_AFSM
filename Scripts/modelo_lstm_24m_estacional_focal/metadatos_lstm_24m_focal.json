@@ -1,0 +1,53 @@
+{
+  "seed": 42,
+  "device": "cpu",
+  "batch_size": 32,
+  "epochs_max": 30,
+  "lr": 0.0005,
+  "patience": 6,
+  "weight_decay": 1e-05,
+  "grad_clip": 1.0,
+  "focal_alpha": 0.75,
+  "focal_gamma": 2.0,
+  "best_epoch": 20,
+  "best_val_pr_auc": 0.03779142290895498,
+  "umbral_optimo": 0.32000000000000006,
+  "metricas_validacion_final": {
+    "loss": 0.005768567332472874,
+    "roc_auc": 0.8286441951118876,
+    "pr_auc": 0.03779142290895498,
+    "brier": 0.025154810398817062,
+    "precision": 0.059850374064837904,
+    "recall": 0.1437125748502994,
+    "f1": 0.08450704225352113,
+    "matriz_confusion": [
+      [
+        26384,
+        377
+      ],
+      [
+        143,
+        24
+      ]
+    ]
+  },
+  "metricas_prueba_final": {
+    "loss": 0.004311916069093054,
+    "roc_auc": 0.9113123412473927,
+    "pr_auc": 0.09091129360552239,
+    "brier": 0.021992532536387444,
+    "precision": 0.08839779005524862,
+    "recall": 0.2191780821917808,
+    "f1": 0.12598425196850394,
+    "matriz_confusion": [
+      [
+        13226,
+        165
+      ],
+      [
+        57,
+        16
+      ]
+    ]
+  }
+}

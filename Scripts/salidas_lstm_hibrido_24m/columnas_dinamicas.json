@@ -1,0 +1,9 @@
+[
+  "precipitacion_media_mensual_mm",
+  "precipitacion_acumulada_3m_mm",
+  "precipitacion_media_3m_mm",
+  "percentil_95_precipitacion_municipal_mm",
+  "indicador_mes_extremo",
+  "sin_mes",
+  "cos_mes"
+]

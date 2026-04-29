@@ -1,0 +1,15 @@
+[
+  "altitud_municipio_m",
+  "area_municipio_km2",
+  "longitud_drenajes_km",
+  "densidad_drenaje_km_km2",
+  "distancia_drenaje_m",
+  "proporcion_humedales",
+  "elevacion_media_m",
+  "pendiente_media_grados",
+  "frontera_agricola_total_ha",
+  "area_excluida_legal_ha",
+  "proporcion_frontera_agricola",
+  "maiz_aptitud_alta_ha",
+  "arroz_aptitud_alta_ha"
+]

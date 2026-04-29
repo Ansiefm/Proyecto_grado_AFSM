@@ -1,0 +1,52 @@
+{
+  "objetivo": "tasa_afectacion_agricola",
+  "objetivo_modelado": "tasa_afectacion_agricola_cap",
+  "p99_cap": 1.0,
+  "mejor_modelo_global_validacion": "rf_rel",
+  "mejor_config_global_validacion": {
+    "familia": "rf_rel",
+    "n_estimators": 500,
+    "max_depth": 10,
+    "min_samples_leaf": 10,
+    "min_samples_split": 20,
+    "max_features": "sqrt"
+  },
+  "mejores_por_familia": [
+    {
+      "modelo": "rf_rel",
+      "config_json": "{\"familia\": \"rf_rel\", \"n_estimators\": 500, \"max_depth\": 10, \"min_samples_leaf\": 10, \"min_samples_split\": 20, \"max_features\": \"sqrt\"}",
+      "val_rmse": 0.38458034764247323,
+      "val_mae": 0.34201661453428217,
+      "val_r2": 0.12878456974807295,
+      "val_spearman": 0.4252633425300939,
+      "test_rmse": 0.3517853051998666,
+      "test_mae": 0.32768641078115596,
+      "test_r2": 0.34105713727606424,
+      "test_spearman": 0.6029201130233873
+    },
+    {
+      "modelo": "gbr_rel",
+      "config_json": "{\"familia\": \"gbr_rel\", \"n_estimators\": 200, \"learning_rate\": 0.01, \"max_depth\": 2, \"min_samples_leaf\": 10, \"subsample\": 0.8}",
+      "val_rmse": 0.39550769002065844,
+      "val_mae": 0.33974268315643513,
+      "val_r2": 0.07857233480125148,
+      "val_spearman": 0.3699028825781969,
+      "test_rmse": 0.34401091351383395,
+      "test_mae": 0.30941100274238786,
+      "test_r2": 0.3698603446777906,
+      "test_spearman": 0.6319876414706818
+    },
+    {
+      "modelo": "tweedie_rel",
+      "config_json": "{\"familia\": \"tweedie_rel\", \"power\": 1.9, \"alpha\": 2.0}",
+      "val_rmse": 0.3981045178641787,
+      "val_mae": 0.34956117367760203,
+      "val_r2": 0.0664327765835131,
+      "val_spearman": 0.3397387284316641,
+      "test_rmse": 0.34806430171913527,
+      "test_mae": 0.30133379342972477,
+      "test_r2": 0.35492332799736115,
+      "test_spearman": 0.5554671160528925
+    }
+  ]
+}
