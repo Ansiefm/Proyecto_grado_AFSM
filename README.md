@@ -21,4 +21,4 @@ Contenido:
 8. OE_2-LSTM.ipynb: Este script contiene la ejecución del Objetivo Especifico 2 que comprende el desarrollo y resultado de modelos LSTM.
 9. OE_3-Diseño_prelimienar_del_reaseguro_parametrico.ipynb: Este script comprende el desarrollo del Objetivo Especifico 3.
 
-Por otro lado, también están los resultados de los modelados de los objetivos especificos 1 y 2.
+Por otro lado, también están los resultados de los modelados de los objetivos especificos 1, 2 y 3.
