@@ -1,0 +1,92 @@
+{
+  "objetivo": "tasa_afectacion_agricola",
+  "objetivo_modelado": "target_modelo",
+  "p99_cap": 1.0,
+  "mejor_configuracion_rmse": {
+    "n_estimators": 300,
+    "max_depth": 2,
+    "learning_rate": 0.01,
+    "subsample": 0.7,
+    "colsample_bytree": 0.7,
+    "min_child_weight": 1,
+    "reg_lambda": 10
+  },
+  "metricas_validacion_rmse": {
+    "rmse": 0.3846260188298587,
+    "mae": 0.3317528413642499,
+    "r2": 0.12857763350690665,
+    "spearman": 0.4395614310370197
+  },
+  "metricas_prueba_rmse": {
+    "rmse": 0.3269829911523716,
+    "mae": 0.2968983823482439,
+    "r2": 0.4306980193936093,
+    "spearman": 0.6970044100471391
+  },
+  "mejor_configuracion_spearman": {
+    "n_estimators": 800,
+    "max_depth": 4,
+    "learning_rate": 0.01,
+    "subsample": 0.7,
+    "colsample_bytree": 0.7,
+    "min_child_weight": 1,
+    "reg_lambda": 10
+  },
+  "metricas_validacion_spearman": {
+    "rmse": 0.402186224479083,
+    "mae": 0.3158542741392378,
+    "r2": 0.0471911863536737,
+    "spearman": 0.4854401498703318
+  },
+  "metricas_prueba_spearman": {
+    "rmse": 0.30592099917120535,
+    "mae": 0.25904921750062787,
+    "r2": 0.5016769818959492,
+    "spearman": 0.7127193635893161
+  },
+  "columnas_modelo": [
+    "mes",
+    "precipitacion_media_mensual_mm",
+    "anio",
+    "codigo_departamento",
+    "altitud_municipio_m",
+    "area_municipio_km2",
+    "longitud_drenajes_km",
+    "densidad_drenaje_km_km2",
+    "distancia_drenaje_m",
+    "proporcion_humedales",
+    "elevacion_media_m",
+    "pendiente_media_grados",
+    "precipitacion_acumulada_3m_mm",
+    "precipitacion_media_3m_mm",
+    "percentil_95_precipitacion_municipal_mm",
+    "indicador_mes_extremo",
+    "arroz_produccion_t",
+    "maiz_produccion_t",
+    "arroz_area_cosechada_ha",
+    "maiz_area_cosechada_ha",
+    "maiz_aptitud_alta_ha",
+    "maiz_aptitud_baja_ha",
+    "maiz_aptitud_media_ha",
+    "maiz_exclusion_legal_ha",
+    "maiz_no_apta_ha",
+    "arroz_aptitud_alta_ha",
+    "arroz_aptitud_baja_ha",
+    "arroz_aptitud_media_ha",
+    "arroz_exclusion_legal_ha",
+    "arroz_no_apta_ha",
+    "frontera_agricola_total_ha",
+    "area_excluida_legal_ha",
+    "indicador_eva_disponible",
+    "indicador_exposicion_eva_reportada",
+    "area_municipio_ha",
+    "proporcion_frontera_agricola",
+    "area_cosechada_total_ha",
+    "produccion_total_t",
+    "proporcion_maiz_aptitud_alta",
+    "proporcion_arroz_aptitud_alta",
+    "proporcion_maiz_area_cosechada",
+    "proporcion_arroz_area_cosechada",
+    "indicador_exposicion_agricola_positiva"
+  ]
+}

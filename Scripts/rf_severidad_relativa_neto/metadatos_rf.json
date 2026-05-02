@@ -6,20 +6,20 @@
     "n_estimators": 800,
     "max_depth": 8,
     "min_samples_leaf": 5,
-    "min_samples_split": 20,
-    "max_features": "sqrt"
+    "min_samples_split": 5,
+    "max_features": null
   },
   "metricas_validacion_final": {
-    "rmse": 0.38652771895568194,
-    "mae": 0.3412641103928388,
-    "r2": 0.1199392120970697,
-    "spearman": 0.43347581681908826
+    "rmse": 0.3979936704295523,
+    "mae": 0.3353044060271501,
+    "r2": 0.06695258542892468,
+    "spearman": 0.39165274359687546
   },
   "metricas_prueba_final": {
-    "rmse": 0.3428318403432932,
-    "mae": 0.3165240882613064,
-    "r2": 0.3741724608057355,
-    "spearman": 0.6227435511517543
+    "rmse": 0.32483210479055014,
+    "mae": 0.28454575648253155,
+    "r2": 0.43816309568303324,
+    "spearman": 0.6667043362239876
   },
   "columnas_modelo": [
     "mes",
@@ -64,7 +64,6 @@
     "proporcion_arroz_aptitud_alta",
     "proporcion_maiz_area_cosechada",
     "proporcion_arroz_area_cosechada",
-    "indicador_eva_observada_fuente",
     "indicador_exposicion_agricola_positiva"
   ]
 }
