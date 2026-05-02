@@ -19,6 +19,6 @@ Contenido:
 6. Analisisestadistico_r: Este script de R comprende el desarrollo del análisis estadístico de datos continuos del dataset obtenido.
 7. OE_1-RF_U-NET.ipynb: Este script contiene la ejecución del Objetivo Especifico 1 que es el desarrollo y resultado de los modelos de Random-Forest y U-net.
 8. OE_2-LSTM.ipynb: Este script contiene la ejecución del Objetivo Especifico 2 que comprende el desarrollo y resultado de modelos LSTM.
-9. OE_3-Ayuda_Reaseguro_parametrico.ipynb: Este script comprende el desarrollo del Objetivo Especifico 3.
+9. OE_3-Diseño_prelimienar_del_reaseguro_parametrico.ipynb: Este script comprende el desarrollo del Objetivo Especifico 3.
 
 Por otro lado, también están los resultados de los modelados de los objetivos especificos 1 y 2.
